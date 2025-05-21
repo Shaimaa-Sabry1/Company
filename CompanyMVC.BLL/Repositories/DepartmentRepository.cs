@@ -12,9 +12,9 @@ namespace CompanyMVC.BLL.Repositories
     public class DepartmentRepository : IDepartmentRepository
     {
         private readonly CompanyDbContext _context;
-        public DepartmentRepository()
+        public DepartmentRepository(CompanyDbContext companyDb)
         {
-            _context = new CompanyDbContext();
+            _context = companyDb;
         }
         public int Add(Department department)
         {
