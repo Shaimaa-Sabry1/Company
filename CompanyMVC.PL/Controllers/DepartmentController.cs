@@ -49,5 +49,58 @@ namespace CompanyMVC.PL.Controllers
             return View(model);
 
         }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var department = _departmentRepository.Get(id);
+            if (department == null)
+            {
+                return NotFound(); // Prevents view from rendering null object
+            }
+
+            return View(department);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var department = _departmentRepository.Get(id);
+          
+            ;
+            if (department == null)
+            {
+                return NotFound(); // Prevents view from rendering null object
+            }
+
+            return View(department);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Department model)
+        {
+            if(ModelState.IsValid)
+            {
+                var department = _departmentRepository.Get(model.Id);
+
+                
+                if (department == null)
+                {
+                    return NotFound(); // Prevents view from rendering null object
+                }
+                department.Code = model.Code;
+                department.Name = model.Name;
+                department.CreateAt = model.CreateAt;
+                var count = _departmentRepository.Update(department);
+                if (count > 0)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+
+                
+            }
+            return View(model);
+
+        }
     }
 }
