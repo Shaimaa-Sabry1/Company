@@ -1,7 +1,59 @@
 ﻿
+@model IEnumerable<Department>
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>All Department</h1>
+
+<br />
+<br />
+<a asp-action="Create" asp-controller="Department" class="btn btn-primary">Create Department</a>
+
+<br />
+<br />
+
+@if (Model.Count() > 0)
+{
+    <table class="table table-hover table-striped ">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>CreateAt</th>
+                <th>Details</th>
+                <th>Update</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.Code</td>
+                    <td>@item.Name</td>
+                    <td>@item.CreateAt</td>
+                    <td>
+                        <a asp-action="Details" asp-controller="Department" class="btn btn-warning">Details</a>
+                    </td>
+
+                    <td>
+                        <a asp-action="Edit" asp-controller="Department" class="btn btn-success">Update</a>
+                    </td>
+                    <td>
+                        <a asp-action="Delete" asp-controller="Department" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div>
+        <h4 class="mr-4 alert alert-info" >
+            There Are No Department :(
+        </h4>
+    </div>
+}
 
