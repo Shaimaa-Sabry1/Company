@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 
 namespace CompanyMVC.BLL.Interfaces
 {
-    public interface IDepartmentRepository:IGenericRepository<Department>
+   public interface IEmployeeRepository:IGenericRepository<Employee>
     {
        
+
+
     }
 }
