@@ -66,15 +66,20 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Edit(int? id)
         {
-            //var department = _departmentRepository.Get(id.Value);
-          
-            //;
-            //if (department == null)
-            //{
-            //    return NotFound(); // Prevents view from rendering null object
-            //}
-
-            return Details(id,"Edit");
+            if (id is null) return BadRequest("Invalid Id");
+            var department = _departmentRepository.Get(id.Value);
+            if (department is null) return NotFound(new
+            {
+                StatusCode = 404,
+                message = $"Department With Id:{id} Is Not Found"
+            });
+            var departmentDto = new CreateDepartmentDto()
+            {
+                Code = department.Code,
+                Name = department.Name,
+                CreateAt = department.CreateAt
+            };
+            return View(departmentDto);
         }
 
         [HttpPost]
