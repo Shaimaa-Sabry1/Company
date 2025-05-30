@@ -64,15 +64,51 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Edit(int?id)
         {
-            return Details(id, "Edit");
+            if (id is null) return BadRequest("Invalid Id");
+            var employee = _employeeRepository.Get(id.Value);
+            if (employee is null) return NotFound(new
+            {
+                StatusCode = 404,
+                message = $"Employee With Id:{id} Is Not Found"
+            });
+            var employeeDto = new CreateEmployeeDto()
+            {
+                
+                Name = employee.Name,
+                Address = employee.Address,
+                Age = employee.Age,
+                Phone = employee.Phone,
+                Email = employee.Email,
+                Salary = employee.Salary,
+                CreateAt = employee.CreateAt,
+                HiringDate = employee.HiringDate,
+                IsActive = employee.IsActive,
+                IsDeleted = employee.IsDeleted
+            };
+            return View(employeeDto);
+
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id,Employee employee)
+        public IActionResult Edit([FromRoute] int id,CreateEmployeeDto model)
         {
             if(ModelState.IsValid)
             {
-                if (id != employee.Id) return BadRequest();
+
+                var employee = new Employee()
+                {
+                    Id=id,
+                    Name = model.Name,
+                    Address = model.Address,
+                    Age = model.Age,
+                    Phone = model.Phone,
+                    Email = model.Email,
+                    Salary = model.Salary,
+                    CreateAt = model.CreateAt,
+                    HiringDate = model.HiringDate,
+                    IsActive = model.IsActive,
+                    IsDeleted = model.IsDeleted
+                };
                 var count = _employeeRepository.Update(employee);
                 if(count>0)
                 {
@@ -80,7 +116,7 @@ namespace CompanyMVC.PL.Controllers
                 }
                 
             }
-            return View(employee);
+            return View(model);
 
         }
         [HttpGet]
