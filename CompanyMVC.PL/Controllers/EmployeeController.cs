@@ -8,9 +8,11 @@ namespace CompanyMVC.PL.Controllers
     public class EmployeeController : Controller
     {
         private readonly IEmployeeRepository _employeeRepository;
-        public EmployeeController(IEmployeeRepository employeeRepository)
+        private readonly IDepartmentRepository _departmentRepository;
+        public EmployeeController(IEmployeeRepository employeeRepository,IDepartmentRepository departmentRepository)
         {
             _employeeRepository = employeeRepository;
+            _departmentRepository = departmentRepository;
         }
         [HttpGet]
         public IActionResult Index()
@@ -22,6 +24,12 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            var department = _departmentRepository.GetAll();
+            //Dictionary: 2 Property
+            //1.ViewData: Transfer Extra Information From Controller (Action) To View
+            //2.ViewBag: Transfer Extra Information From Controller (Action) To View
+            
+            ViewData["departments"] = department;
             return View();
         }
         [HttpPost]
@@ -40,11 +48,13 @@ namespace CompanyMVC.PL.Controllers
                     CreateAt = model.CreateAt,
                     HiringDate = model.HiringDate,
                     IsActive = model.IsActive,
-                    IsDeleted = model.IsDeleted
+                    IsDeleted = model.IsDeleted,
+                    DepartmentId=model.DepartmentId
                 };
                 var count = _employeeRepository.Add(employee);
                 if(count>0)
                 {
+                    TempData["Message"] = "Employee Is Created !!";
                     return RedirectToAction(nameof(Index));
                 }
                
@@ -64,6 +74,9 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Edit(int?id)
         {
+            var department = _departmentRepository.GetAll();
+
+            ViewData["departments"] = department;
             if (id is null) return BadRequest("Invalid Id");
             var employee = _employeeRepository.Get(id.Value);
             if (employee is null) return NotFound(new
@@ -83,7 +96,8 @@ namespace CompanyMVC.PL.Controllers
                 CreateAt = employee.CreateAt,
                 HiringDate = employee.HiringDate,
                 IsActive = employee.IsActive,
-                IsDeleted = employee.IsDeleted
+                IsDeleted = employee.IsDeleted,
+                DepartmentId=employee.DepartmentId
             };
             return View(employeeDto);
 
@@ -107,7 +121,8 @@ namespace CompanyMVC.PL.Controllers
                     CreateAt = model.CreateAt,
                     HiringDate = model.HiringDate,
                     IsActive = model.IsActive,
-                    IsDeleted = model.IsDeleted
+                    IsDeleted = model.IsDeleted,
+                    DepartmentId=model.DepartmentId
                 };
                 var count = _employeeRepository.Update(employee);
                 if(count>0)

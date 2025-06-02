@@ -1,6 +1,7 @@
 ﻿using CompanyMVC.BLL.Interfaces;
 using CompanyMVC.DAL.Data.Contexts;
 using CompanyMVC.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,10 @@ namespace CompanyMVC.BLL.Repositories
 
         public IEnumerable<T> GetAll()
         {
+            if(typeof(T)==typeof(Employee))
+            {
+                return (IEnumerable<T>) _dbContext.Employees.Include(E => E.Department).ToList();
+            }
             return _dbContext.Set<T>().ToList();
         }
 
