@@ -15,9 +15,19 @@ namespace CompanyMVC.PL.Controllers
             _departmentRepository = departmentRepository;
         }
         [HttpGet]
-        public IActionResult Index()
+        public IActionResult Index(string? SearchInput)
         {
-            var employee = _employeeRepository.GetAll();
+             IEnumerable<Employee>employee;
+
+            if(string.IsNullOrEmpty(SearchInput))
+            {
+                 employee = _employeeRepository.GetAll();
+
+            }
+            else
+            {
+                 employee = _employeeRepository.GetByName(SearchInput);
+            }
 
             return View(employee);
         }
