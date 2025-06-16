@@ -1,6 +1,7 @@
 using CompanyMVC.BLL.Interfaces;
 using CompanyMVC.BLL.Repositories;
 using CompanyMVC.DAL.Data.Contexts;
+using CompanyMVC.PL.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace CompanyMVC.PL
@@ -15,6 +16,7 @@ namespace CompanyMVC.PL
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository >();
+            builder.Services.AddAutoMapper(M=>M.AddProfile(new EmployeeProfile()));
             builder.Services.AddDbContext<CompanyDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

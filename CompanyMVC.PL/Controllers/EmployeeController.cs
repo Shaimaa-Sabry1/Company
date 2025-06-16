@@ -1,4 +1,5 @@
-﻿using CompanyMVC.BLL.Interfaces;
+﻿using AutoMapper;
+using CompanyMVC.BLL.Interfaces;
 using CompanyMVC.DAL.Models;
 using CompanyMVC.PL.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,15 @@ namespace CompanyMVC.PL.Controllers
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IDepartmentRepository _departmentRepository;
-        public EmployeeController(IEmployeeRepository employeeRepository,IDepartmentRepository departmentRepository)
+        private readonly IMapper _mapper;
+
+        public EmployeeController(IEmployeeRepository employeeRepository,
+            IDepartmentRepository departmentRepository,
+            IMapper mapper)
         {
             _employeeRepository = employeeRepository;
             _departmentRepository = departmentRepository;
+            this._mapper = mapper;
         }
         [HttpGet]
         public IActionResult Index(string? SearchInput)
@@ -45,22 +51,23 @@ namespace CompanyMVC.PL.Controllers
         [HttpPost]
         public IActionResult Create(CreateEmployeeDto model)
         {
-            if(ModelState.IsValid)
-            {
-                var employee = new Employee()
+            if (ModelState.IsValid)
                 {
-                    Name = model.Name,
-                    Address = model.Address,
-                    Age = model.Age,
-                    Phone = model.Phone,
-                    Email = model.Email,
-                    Salary = model.Salary,
-                    CreateAt = model.CreateAt,
-                    HiringDate = model.HiringDate,
-                    IsActive = model.IsActive,
-                    IsDeleted = model.IsDeleted,
-                    DepartmentId=model.DepartmentId
-                };
+                //    var employee = new Employee()
+                //    {
+                //        Name = model.Name,
+                //        Address = model.Address,
+                //        Age = model.Age,
+                //        Phone = model.Phone,
+                //        Email = model.Email,
+                //        Salary = model.Salary,
+                //        CreateAt = model.CreateAt,
+                //        HiringDate = model.HiringDate,
+                //        IsActive = model.IsActive,
+                //        IsDeleted = model.IsDeleted,
+                //        DepartmentId=model.DepartmentId
+                //    };
+               var employee= _mapper.Map<Employee>(model);
                 var count = _employeeRepository.Add(employee);
                 if(count>0)
                 {
@@ -94,22 +101,9 @@ namespace CompanyMVC.PL.Controllers
                 StatusCode = 404,
                 message = $"Employee With Id:{id} Is Not Found"
             });
-            var employeeDto = new CreateEmployeeDto()
-            {
-                
-                Name = employee.Name,
-                Address = employee.Address,
-                Age = employee.Age,
-                Phone = employee.Phone,
-                Email = employee.Email,
-                Salary = employee.Salary,
-                CreateAt = employee.CreateAt,
-                HiringDate = employee.HiringDate,
-                IsActive = employee.IsActive,
-                IsDeleted = employee.IsDeleted,
-                DepartmentId=employee.DepartmentId
-            };
-            return View(employeeDto);
+           
+            var dto = _mapper.Map<CreateEmployeeDto>(employee);
+            return View(dto);
 
         }
         [HttpPost]
