@@ -17,6 +17,7 @@ namespace CompanyMVC.PL
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository >();
             builder.Services.AddAutoMapper(M=>M.AddProfile(new EmployeeProfile()));
+            builder.Services.AddAutoMapper(M=>M.AddProfile(new DepartmentProfile()));
             builder.Services.AddDbContext<CompanyDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

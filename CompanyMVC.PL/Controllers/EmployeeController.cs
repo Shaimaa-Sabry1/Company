@@ -23,16 +23,16 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Index(string? SearchInput)
         {
-             IEnumerable<Employee>employee;
+            IEnumerable<Employee> employee;
 
-            if(string.IsNullOrEmpty(SearchInput))
+            if (string.IsNullOrEmpty(SearchInput))
             {
-                 employee = _employeeRepository.GetAll();
+                employee = _employeeRepository.GetAll();
 
             }
             else
             {
-                 employee = _employeeRepository.GetByName(SearchInput);
+                employee = _employeeRepository.GetByName(SearchInput);
             }
 
             return View(employee);
@@ -44,7 +44,7 @@ namespace CompanyMVC.PL.Controllers
             //Dictionary: 2 Property
             //1.ViewData: Transfer Extra Information From Controller (Action) To View
             //2.ViewBag: Transfer Extra Information From Controller (Action) To View
-            
+
             ViewData["departments"] = department;
             return View();
         }
@@ -52,116 +52,91 @@ namespace CompanyMVC.PL.Controllers
         public IActionResult Create(CreateEmployeeDto model)
         {
             if (ModelState.IsValid)
-                {
-                //    var employee = new Employee()
-                //    {
-                //        Name = model.Name,
-                //        Address = model.Address,
-                //        Age = model.Age,
-                //        Phone = model.Phone,
-                //        Email = model.Email,
-                //        Salary = model.Salary,
-                //        CreateAt = model.CreateAt,
-                //        HiringDate = model.HiringDate,
-                //        IsActive = model.IsActive,
-                //        IsDeleted = model.IsDeleted,
-                //        DepartmentId=model.DepartmentId
-                //    };
-               var employee= _mapper.Map<Employee>(model);
+            {
+
+                var employee = _mapper.Map<Employee>(model);
                 var count = _employeeRepository.Add(employee);
-                if(count>0)
+                if (count > 0)
                 {
                     TempData["Message"] = "Employee Is Created !!";
                     return RedirectToAction(nameof(Index));
                 }
-               
+
             }
             return View(model);
 
         }
 
         [HttpGet]
-        public IActionResult Details(int?id,string viewName="Details")
+        public IActionResult Details(int? id)
         {
             if (id is null) return BadRequest("Invalid Id");
             var employee = _employeeRepository.Get(id.Value);
             if (employee is null) return NotFound(new { StatusCode = 404, message = $"Employee With Id : {id} is Not Found" });
-            return View(viewName, employee);
+            var dto = _mapper.Map<CreateEmployeeDto>(employee);
+            return View(dto);
         }
         [HttpGet]
-        public IActionResult Edit(int?id)
+        public IActionResult Edit(int? id, string viewName = "Edit")
         {
             var department = _departmentRepository.GetAll();
 
             ViewData["departments"] = department;
             if (id is null) return BadRequest("Invalid Id");
             var employee = _employeeRepository.Get(id.Value);
+
             if (employee is null) return NotFound(new
             {
                 StatusCode = 404,
                 message = $"Employee With Id:{id} Is Not Found"
             });
-           
+
             var dto = _mapper.Map<CreateEmployeeDto>(employee);
-            return View(dto);
+            return View(viewName, dto);
 
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id,CreateEmployeeDto model)
+        public IActionResult Edit([FromRoute] int id, CreateEmployeeDto model, string viewName = "Edit")
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
 
-                var employee = new Employee()
-                {
-                    Id=id,
-                    Name = model.Name,
-                    Address = model.Address,
-                    Age = model.Age,
-                    Phone = model.Phone,
-                    Email = model.Email,
-                    Salary = model.Salary,
-                    CreateAt = model.CreateAt,
-                    HiringDate = model.HiringDate,
-                    IsActive = model.IsActive,
-                    IsDeleted = model.IsDeleted,
-                    DepartmentId=model.DepartmentId
-                };
+                var employee = _mapper.Map<Employee>(model);
                 var count = _employeeRepository.Update(employee);
-                if(count>0)
+                if (count > 0)
                 {
                     return RedirectToAction(nameof(Index));
                 }
-                
+
             }
-            return View(model);
+            return View(viewName, model);
 
         }
         [HttpGet]
-        
-        public IActionResult Delete(int?id)
+
+        public IActionResult Delete(int? id)
         {
-            return Details(id, "Delete");
+            return Edit(id, "Delete");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete([FromRoute] int id,Employee employee)
+        public IActionResult Delete([FromRoute] int id)
         {
-            if(ModelState.IsValid)
+            var employee = _employeeRepository.Get(id); // Fetch from DB
+            if (employee == null)
             {
-                if (id != employee.Id) return BadRequest();
-                var count = _employeeRepository.Delete(employee);
-                if(count>0)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-
+                return NotFound();
             }
+
+            var count = _employeeRepository.Delete(employee); // Now tracked and valid
+            if (count > 0)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             return View(employee);
         }
-
-
     }
-}
+    }

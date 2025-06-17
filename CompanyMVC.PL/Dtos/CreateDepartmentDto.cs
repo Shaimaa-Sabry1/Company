@@ -4,6 +4,7 @@ namespace CompanyMVC.PL.Dtos
 {
     public class CreateDepartmentDto
     {
+        public int Id { get; set; }
         [Required(ErrorMessage ="Code Is Required !")]
         public string Code { get; set; }
         
