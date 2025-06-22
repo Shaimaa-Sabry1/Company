@@ -8,17 +8,18 @@ namespace CompanyMVC.PL.Controllers
 {
     public class EmployeeController : Controller
     {
-        private readonly IEmployeeRepository _employeeRepository;
-        private readonly IDepartmentRepository _departmentRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
+       
         private readonly IMapper _mapper;
 
-        public EmployeeController(IEmployeeRepository employeeRepository,
-            IDepartmentRepository departmentRepository,
+        public EmployeeController(
+        IUnitOfWork unitOfWork,
             IMapper mapper)
         {
-            _employeeRepository = employeeRepository;
-            _departmentRepository = departmentRepository;
-            this._mapper = mapper;
+            this._unitOfWork = unitOfWork;
+           
+            _mapper = mapper;
         }
         [HttpGet]
         public IActionResult Index(string? SearchInput)
@@ -27,12 +28,12 @@ namespace CompanyMVC.PL.Controllers
 
             if (string.IsNullOrEmpty(SearchInput))
             {
-                employee = _employeeRepository.GetAll();
+                employee = _unitOfWork.EmployeeRepository.GetAll();
 
             }
             else
             {
-                employee = _employeeRepository.GetByName(SearchInput);
+                employee = _unitOfWork.EmployeeRepository.GetByName(SearchInput);
             }
 
             return View(employee);
@@ -40,7 +41,7 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var department = _departmentRepository.GetAll();
+            var department = _unitOfWork.DepartmentRepository.GetAll();
             //Dictionary: 2 Property
             //1.ViewData: Transfer Extra Information From Controller (Action) To View
             //2.ViewBag: Transfer Extra Information From Controller (Action) To View
@@ -55,7 +56,8 @@ namespace CompanyMVC.PL.Controllers
             {
 
                 var employee = _mapper.Map<Employee>(model);
-                var count = _employeeRepository.Add(employee);
+                 _unitOfWork.EmployeeRepository.Add(employee);
+                var count = _unitOfWork.Complete();
                 if (count > 0)
                 {
                     TempData["Message"] = "Employee Is Created !!";
@@ -71,7 +73,7 @@ namespace CompanyMVC.PL.Controllers
         public IActionResult Details(int? id)
         {
             if (id is null) return BadRequest("Invalid Id");
-            var employee = _employeeRepository.Get(id.Value);
+            var employee = _unitOfWork.EmployeeRepository.Get(id.Value);
             if (employee is null) return NotFound(new { StatusCode = 404, message = $"Employee With Id : {id} is Not Found" });
             var dto = _mapper.Map<CreateEmployeeDto>(employee);
             return View(dto);
@@ -79,11 +81,12 @@ namespace CompanyMVC.PL.Controllers
         [HttpGet]
         public IActionResult Edit(int? id, string viewName = "Edit")
         {
-            var department = _departmentRepository.GetAll();
+            var department = _unitOfWork.DepartmentRepository.GetAll();
+
 
             ViewData["departments"] = department;
             if (id is null) return BadRequest("Invalid Id");
-            var employee = _employeeRepository.Get(id.Value);
+            var employee = _unitOfWork.EmployeeRepository.Get(id.Value);
 
             if (employee is null) return NotFound(new
             {
@@ -103,7 +106,8 @@ namespace CompanyMVC.PL.Controllers
             {
 
                 var employee = _mapper.Map<Employee>(model);
-                var count = _employeeRepository.Update(employee);
+                _unitOfWork.EmployeeRepository.Update(employee);
+                var count = _unitOfWork.Complete();
                 if (count > 0)
                 {
                     return RedirectToAction(nameof(Index));
@@ -124,13 +128,14 @@ namespace CompanyMVC.PL.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete([FromRoute] int id)
         {
-            var employee = _employeeRepository.Get(id); // Fetch from DB
+            var employee = _unitOfWork.EmployeeRepository.Get(id); // Fetch from DB
             if (employee == null)
             {
                 return NotFound();
             }
 
-            var count = _employeeRepository.Delete(employee); // Now tracked and valid
+             _unitOfWork.EmployeeRepository.Delete(employee); // Now tracked and valid
+            var count = _unitOfWork.Complete();
             if (count > 0)
             {
                 return RedirectToAction(nameof(Index));

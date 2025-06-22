@@ -18,16 +18,14 @@ namespace CompanyMVC.BLL.Repositories
             _dbContext = dbContext;
             
         }
-        public int Add(T model)
+        public void Add(T model)
         {
             _dbContext.Set<T>().Add(model);
-            return _dbContext.SaveChanges();
         }
 
-        public int Delete(T model)
+        public void Delete(T model)
         {
             _dbContext.Set<T>().Remove(model);
-            return _dbContext.SaveChanges();
         }
 
         public T? Get(int id)
@@ -44,10 +42,9 @@ namespace CompanyMVC.BLL.Repositories
             return _dbContext.Set<T>().ToList();
         }
 
-        public int Update(T model)
+        public void Update(T model)
         {
             _dbContext.Set<T>().Update(model);
-            return _dbContext.SaveChanges();
         }
     }
 }
