@@ -1,3 +1,4 @@
+using CompanyMVC.BLL;
 using CompanyMVC.BLL.Interfaces;
 using CompanyMVC.BLL.Repositories;
 using CompanyMVC.DAL.Data.Contexts;
@@ -15,6 +16,7 @@ namespace CompanyMVC.PL
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository >();
             builder.Services.AddAutoMapper(M=>M.AddProfile(new EmployeeProfile()));
             builder.Services.AddAutoMapper(M=>M.AddProfile(new DepartmentProfile()));
