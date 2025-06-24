@@ -25,14 +25,14 @@ namespace CompanyMVC.BLL
 
         }
 
-        public int Complete()
+        public async Task<int> CompleteAsync()
         {
-            return _companyDb.SaveChanges();
+            return await _companyDb.SaveChangesAsync();
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            _companyDb.Dispose();
+            await _companyDb.DisposeAsync();
         }
     }
 }
