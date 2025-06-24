@@ -2,7 +2,9 @@
 using CompanyMVC.BLL.Interfaces;
 using CompanyMVC.DAL.Models;
 using CompanyMVC.PL.Dtos;
+using CompanyMVC.PL.Helper;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace CompanyMVC.PL.Controllers
 {
@@ -22,26 +24,26 @@ namespace CompanyMVC.PL.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public IActionResult Index(string? SearchInput)
+        public async Task<IActionResult> Index(string? SearchInput)
         {
             IEnumerable<Employee> employee;
 
             if (string.IsNullOrEmpty(SearchInput))
             {
-                employee = _unitOfWork.EmployeeRepository.GetAll();
+                employee =await _unitOfWork.EmployeeRepository.GetAllAsync();
 
             }
             else
             {
-                employee = _unitOfWork.EmployeeRepository.GetByName(SearchInput);
+                employee =await _unitOfWork.EmployeeRepository.GetByNameAsync(SearchInput);
             }
 
             return View(employee);
         }
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var department = _unitOfWork.DepartmentRepository.GetAll();
+            var department =await _unitOfWork.DepartmentRepository.GetAllAsync();
             //Dictionary: 2 Property
             //1.ViewData: Transfer Extra Information From Controller (Action) To View
             //2.ViewBag: Transfer Extra Information From Controller (Action) To View
@@ -50,14 +52,19 @@ namespace CompanyMVC.PL.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Create(CreateEmployeeDto model)
+        public async Task<IActionResult> Create(CreateEmployeeDto model)
         {
             if (ModelState.IsValid)
             {
 
+                if(model.Image is not null)
+                {
+                  model.ImageName=  DocumentSetting.UploadFile(model.Image, "Images");
+
+                }
                 var employee = _mapper.Map<Employee>(model);
-                 _unitOfWork.EmployeeRepository.Add(employee);
-                var count = _unitOfWork.Complete();
+                await _unitOfWork.EmployeeRepository.AddAsync(employee);
+                var count =await _unitOfWork.CompleteAsync();
                 if (count > 0)
                 {
                     TempData["Message"] = "Employee Is Created !!";
@@ -70,23 +77,23 @@ namespace CompanyMVC.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id is null) return BadRequest("Invalid Id");
-            var employee = _unitOfWork.EmployeeRepository.Get(id.Value);
+            var employee =await _unitOfWork.EmployeeRepository.GetAsync(id.Value);
             if (employee is null) return NotFound(new { StatusCode = 404, message = $"Employee With Id : {id} is Not Found" });
             var dto = _mapper.Map<CreateEmployeeDto>(employee);
             return View(dto);
         }
         [HttpGet]
-        public IActionResult Edit(int? id, string viewName = "Edit")
+        public async Task<IActionResult> Edit(int? id, string viewName = "Edit")
         {
-            var department = _unitOfWork.DepartmentRepository.GetAll();
+            var department =await _unitOfWork.DepartmentRepository.GetAllAsync();
 
 
             ViewData["departments"] = department;
             if (id is null) return BadRequest("Invalid Id");
-            var employee = _unitOfWork.EmployeeRepository.Get(id.Value);
+            var employee =await _unitOfWork.EmployeeRepository.GetAsync(id.Value);
 
             if (employee is null) return NotFound(new
             {
@@ -100,14 +107,22 @@ namespace CompanyMVC.PL.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, CreateEmployeeDto model, string viewName = "Edit")
+        public async Task<IActionResult> Edit([FromRoute] int id, CreateEmployeeDto model, string viewName = "Edit")
         {
             if (ModelState.IsValid)
             {
 
+                if(model.ImageName is not null && model.Image is not null)
+                {
+                    DocumentSetting.Delete(model.ImageName, "Images");
+                }
+                if(model.Image is not null)
+                {
+                    model.ImageName=   DocumentSetting.UploadFile(model.Image, "Images");
+                }
                 var employee = _mapper.Map<Employee>(model);
                 _unitOfWork.EmployeeRepository.Update(employee);
-                var count = _unitOfWork.Complete();
+                var count =await _unitOfWork.CompleteAsync();
                 if (count > 0)
                 {
                     return RedirectToAction(nameof(Index));
@@ -119,25 +134,30 @@ namespace CompanyMVC.PL.Controllers
         }
         [HttpGet]
 
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            return Edit(id, "Delete");
+            return await Edit(id, "Delete");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var employee = _unitOfWork.EmployeeRepository.Get(id); // Fetch from DB
+            var employee =await _unitOfWork.EmployeeRepository.GetAsync(id); // Fetch from DB
             if (employee == null)
             {
                 return NotFound();
             }
 
              _unitOfWork.EmployeeRepository.Delete(employee); // Now tracked and valid
-            var count = _unitOfWork.Complete();
+            var count =await _unitOfWork.CompleteAsync();
             if (count > 0)
             {
+                if(employee.ImageName is not null)
+                {
+                    DocumentSetting.Delete(employee.ImageName, "Images");
+
+                }
                 return RedirectToAction(nameof(Index));
             }
 

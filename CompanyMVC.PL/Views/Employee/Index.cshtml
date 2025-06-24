@@ -47,6 +47,7 @@
                 <th>@Html.DisplayNameFor(E => E.HiringDate)</th>
                 <th>@Html.DisplayNameFor(E => E.CreateAt)</th>
                 <th>Department Name</th>
+                <th>Image</th>
                 <th>Details</th>
                 <th>Update</th>
                 <th>Delete</th>
@@ -67,6 +68,9 @@
                     <td>@item.HiringDate</td>
                     <td>@item.CreateAt</td>
                     <td>@(item.Department?.Name ?? "N/A")</td>
+                    <td>
+                        <img  src="~/Files/Images/@item.ImageName" class="img-fluid"/>
+                    </td>
                     <partial name="IndexPartialView" model="@item.Id"></partial>
                 </tr>
             }
